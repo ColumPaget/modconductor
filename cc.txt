@@ -1,0 +1,1053 @@
+TriStar MPPT
+MODBUS® Specification
+V11
+MS-002582
+21 August 2018
+Morningstar Corporation
+8 Pheasant Run
+Newtown, PA 18940
+www.morningstarcorp.com
+info@morningstarcorp.com
+General Information
+The TriStar MPPT supports the industry standard MODBUS ® application protocol via its serial RS-232 and
+EIA-485 interfaces and MODBUS TCP via the Ethernet port (TS-MPPT-60 models only). This document
+assumes the user is familiar with both MODBUS ® protocols. Please refer to the documents listed in the
+References section for more information.
+MODBUS® is a registered trademark of Modbus-IDA ( www.modbus-ida.org )
+Parameters
+The TriStar MPPT supports RTU mode only.
+16bit MODBUS addresses (per the modbus.org spec)
+The serial communication parameters:
+ BPS 9600 baud
+ Parity None
+ Data bits 8
+ Stop bits 1 or 2*
+ Flow control None
+*The TriStar accepts either 1 or 2 stop bits. It will send 2 stop bits to provide extra byte padding. The
+connected PC can be set to receive either 1 or 2 stop bits.
+The default TCP communication parameters:
+DHCP enabled
+Port 502
+MODBUS ID 1
+NETBIOS address tsmppt + serial number (no spaces)
+LiveView Web address http://tsmpptXXXXXXX (where X is the serial number)
+If DHCP fails, the following default parameters will be assigned:
+IP 192.168.1.253
+Gateway 192.168.1.1
+Primary DNS 192.168.1.1
+Secondary DNS 192.168.1.1
+Subnet Mask 255.255.255.0
+Note: the TCP socket is closed by the TS-MPPT after each MODBUS response (change pending)
+All addresses listed are for the request PDU.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 3/29 MS-002582 v11
+Supported MODBUS Functions
+Read Holding Registers (0x03) and Read Input Registers (0x04)
+RAM
+PDU
+Addr
+Log
+ical
+Add
+r
+Variable name Variable description Units Signed Scaling or Range WS SNMP
+Scaling Values
+0x0000 1 V_PU hi Voltage scaling, whole
+term
+V -
+0x0001 2 V_PU lo Voltage scaling,
+fractional term
+- -
+0x0002 3 I_PU hi Current scaling, whole
+term
+A -
+0x0003 4 I_PU lo Current scaling,
+fractional term
+- -
+0x0004 5 ver_sw Software Version - -
+0x0005
+–
+0x0017
+6-9
+RESERVED
+Filtered ADC
+0x0018 25 adc_vb_f_med Battery voltage, filtered
+(τ ≈ ?s)
+V √ n·V_PU·2 -15
+0x0019 26 adc_vbterm_f Batt. Terminal voltage,
+filtered (τ ≈ ?s)
+V √ n·V_PU·2 -15
+0x001A 27 adc_vbs_f Battery Sense voltage,
+filtered (τ ≈ ?s)
+V √ n·V_PU·2 -15
+0x001B 28 adc_va_f Array voltage, filtered (τ
+≈ ?s)
+V √ n·V_PU·2 -15
+D
+0x001C 29 adc_ib_f_shado
+w
+Battery current, filtered
+(τ ≈ ?s)
+A √ n·I_PU·2 -15
+0x001D 30 adc_ia_f_shado
+w
+Array current, filtered (τ
+≈ ?s)
+A √ n·I_PU·2 -15
+0x001E 31 adc_p12_f 12 volt supply, filtered
+(τ ≈ ?s)
+V √ n·18.612·2 -15
+D
+0x001F 32 adc_p3_f 3 volt supply, filtered (τ
+≈ ?s)
+V √ 6.6·2 -15
+0x0020 33 adc_pmeter_f MeterBus voltage,
+filtered (τ ≈ ?s)
+V √ n·18.612·2 -15
+0x0021 34 adc_p18_f 1.8 volt supply, filtered
+(τ ≈ ?s)
+V √ n·3·2 -15
+0x0022 35 adc_v_ref reference voltage V √ n·3·2 -15
+Temperatures
+0x0023 36 T_hs Heatsink temperature C √ -127 to +127 D
+0x0024 37 T_rts RTS temperature (0x80
+= disconnect)
+C √ -127 to +127
+0x0025 38 T_batt Battery regulation
+temperature
+C √ -127 to +127 D
+Status
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 4/29 MS-002582 v11
+0x0026 39 adc_vb_f_1m Battery voltage, filtered
+(τ ≈ 1min)
+V √ n·V_PU·2 -15
+D
+0x0027 40 adc_ib_f_1m Charging current,
+filtered (τ ≈ 1min)
+A √ n·I_PU·2 -15
+D
+0x0028 41 vb_min Minimum battery
+voltage
+V √ n·V_PU·2 -15
+0x0029 42 vb_max Maximum battery
+voltage
+V √ n·V_PU·2 -15
+0x002A 43 hourmeter_HI hourmeter, HI word h -
+0x002B 44 hourmeter_LO hourmeter, LO word h -
+0x002C 45 fault.all Controller faults bitfield - - D
+0x002D 46 reserved
+0x002E 47 alarm_HI alarm bitfield – HI word - - D
+0x002F 48 alarm_LO alarm bitfield – LO
+word
+- - D
+0x0030 49 dip.all DIP switch positions
+bitfield
+- -
+0x0031 50 led.state State of LED indications - -
+Charger
+0x0032 51 charge_state Charging stage - - D
+0x0033 52 vb_ref Target regulation
+voltage
+V √ n·V_PU·2 -15 D
+0x0034 53 Ahc_r HI Ah charge – resetable Ah n·0.1 D
+0x0035 54 Ahc_r LO - D
+0x0036 55 Ahc_t HI Ah charge – total Ah n·0.1
+0x0037 56 Ahc_t LO -
+0x0038 57 kwhc_r kWhr charge resetable - D
+0x0039 58 kwhc_t kWhr charge total -
+MPPT
+0x003A 59 power_out_shad
+ow
+Output Power W n·V_PU·I_PU·2 -17
+D
+0x003B 60 power_in_shado
+w
+Input Power W n·V_PU·I_PU·2 -17
+0x003C 61 sweep_Pin_max Max. Power of last
+sweep
+W n·V_PU·I_PU·2 -17
+D
+0x003D 62 sweep_vmp Vmp of last sweep V √ n·V_PU·2 -15
+D
+0x003E 63 sweep_voc Voc of last sweep V √ n·V_PU·2 -15
+D
+0x003F 64 RESERVED
+Logger – Today’s values
+0x0040 65 vb_min_daily Min. daily battery
+voltage
+V √ n·V_PU·2 -15
+0x0041 66 vb_max_daily Max. daily battery
+voltage
+V √ n·V_PU·2 -15
+0x0042 67 va_max_daily Max. daily input voltage V √ n·V_PU·2 -15
+0x0043 68 Ahc_daily Total Ah charge daily Ah n·0.1
+0x0044 69 whc_daily Total Wh charge daily Wh
+0x0045 70 flags_daily Daily flags bitfield -
+0x0046 71 Pout_max_daily Max. Power Out, daily W n·V_PU·I_PU·2 -17
+0x0047 72 Tb_min_daily Min. battery temp. daily C √ -127 to +127
+0x0048 73 Tb_max_daily Max. battery temp. daily C √ -127 to +127
+0x0049 74 fault_daily Faults, daily -
+0x004A 75 RESERVED
+0x004B 76 alarm_daily HI Daily alarms bitfield -
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 5/29 MS-002582 v11
+0x004C 77 alarm_daily LO -
+0x004D 78 time_ab_daily cumulative time in
+absorption, daily
+s
+0x004E 79 time_eq_daily cumulative time in
+equalize, daily
+s
+0x004F 80 time_fl_daily cumulative time in float,
+daily
+s
+0x0050
+–
+0x0057
+81 -
+88
+RESERVED
+Manual Control
+0x0058 89 Ib_ref_slave Battery current
+regulation override
+A √ n·80·2 -15
+0x0059 90 vb_ref_slave battery voltage
+regulation override
+V √ n·V_PU·2 -15
+0x005A 91 va_ref_fixed Array V fixed voltage
+target
+V √ n·V_PU·2 -15
+0x005B 92 va_ref_fixed_pc
+t
+Array V % of Voc
+voltage target
+% n·100·2 -16
+Active TCP Network Settings
+0x1000 ProcessorB_Ver
+sion
+Processor B Firmware
+version
+-
+0x1001
+–
+0x100E
+RESERVED
+0x100F IPAddrByte
+[1][0]
+IP Address Bytes -
+0x1010 IPAddrByte
+[3][2]
+IP Address Bytes -
+0x1011 SubNetMask
+[1][0]
+Subnet Mask Bytes -
+0x1012 SubNetMask
+[3][2]
+Subnet Mask Bytes -
+0x1013 Gateway [1][0] Gateway Bytes -
+0x1014 Gateway [3][2] Gateway Bytes -
+0x1015 PrimaryDNS
+[1][0]
+PrimaryDNS Bytes -
+0x1016 PrimaryDNS
+[3][2]
+PrimaryDNS Bytes -
+0x1017 SecondaryDNS
+[1][0]
+SecondaryDNS Bytes -
+0x1018 SecondaryDNS
+[3][2]
+SecondaryDNS Bytes -
+0x1019-
+0x101C
+RESERVED
+0x101D
+–
+0x1024
+ControllerID String of 16 bytes, 00
+terminates string
+- ASCII
+0x1025 NetFlags 0x4000=DHCP
+Enabled, 0x0=DHCP
+disabled
+-
+0x1026 MACAddress[1]
+,[0]
+MAC Address Bytes
+-
+0x1027 MACAddress[3]
+,[2]
+MAC Address Bytes -
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 6/29 MS-002582 v11
+0x1028 MACAddress[5]
+,[4]
+MAC Address Bytes -
+0x1029–
+0x1030
+NetBIOS Name String of 16 bytes, 00
+terminates string
+- ASCII
+EEPROM
+PDU
+Addr
+Logical
+Addr
+Variable name Variable description Units Signed Scaling or Range
+TCP Network Settings
+0x151B 5404 HTTPPort HTTP Port Number - 1 to 65535
+0x151C 5405 MBIPPort MODBUS IP Port Number - 1 to 65535
+0x151D 5406 NetRules BIT0: IP Bridging Enabled - 0 or 1
+0x151E 5407 SNMPTrapRecPort SNMP Trap Destination NMS Port - 1 to 65535
+0x151F 5408 Ethernet Power Save Mode Bit0: Power Save On=1 -
+0x1520 5409 BETA 8.21
+VLAN Enable
+Bit0: Vlan Tagging
+regognition/sending = 1
+0x1521 5410 BETA 8.21
+VLAN Parameters
+Bit 0-11 VID 0-4094, 4095
+reserved,
+Bit 12 CFI (usually 0)
+Bits 15-13 PCP Priority 0-7
+0x1522 –
+0x1528
+…
+RESERVED
+0x152B –
+0x1534
+…
+RESERVED
+Charge settings
+0xE000 57345 EV_absorp Absorption voltage @ 25ºC V √ n·V_PU·2 -15
+0xE001 57346 EV_float Float voltage @ 25ºC
+Set to zero to disable float
+V √ n·V_PU·2 -15
+0xE002 57347 Et_absorp absorption time s 0-(2 16 -1)
+0xE003 57348 Et_absorp_ext absorption extension time s 0-(2 16 -1)
+0xE004 57349 EV_absorp_ext absorp. Extension threshold
+voltage
+V √ n·V_PU·2 -15
+0xE005 57350 EV_float_cancel Voltage that cancels float V √ n·V_PU·2 -15
+0xE006 57351 Et_float_exit_cum Exit float timer s 0-(2 16 -1)
+0xE007 57352 EV_eq Equalize V @ 25ºC Set 0 to
+disable
+V √ n·V_PU·2 -15
+0xE008 57353 Et_eqcalendar days between eq cycles days 0-255
+0xE009 57354 Et_eq_above equalize time limit above Vreg s 0-(2 16 -1)
+0xE00A 57355 Et_eq_reg equalize time limit at Veq s 0-(2 16 -1)
+0xE00B 57356 Et_batt_service battery service timer days
+0xE00C 57357 not used -
+0xE00D 57558 EV_tempcomp temp. compensation coefficient
+Note:2^-16 scaling, negative
+assumed
+V n·V_PU·2 -16
+0xE00E 57359 EV_hvd Battery High Voltage Disconnect V √ n·V_PU·2 -15
+0xE00F 57360 EV_hvr Battery High Voltage Reconnect V √ n·V_PU·2 -15
+0xE010 57361 Evb_ref_lim battery charge reference limit V √ n·V_PU·2 -15
+0xE011 57362 ETb_max max. temp comp limit C √
+0xE012 57363 ETb_min min. temp comp limit C √
+0xE013 57364 not used
+0xE014 57365 not used
+0xE015 57366 EV_soc_g_gy LED threshold: green to V √ n·V_PU·2 -15
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 7/29 MS-002582 v11
+green/yellow
+0xE016 57367 EV_soc_gy_y LED threshold: green/yellow to
+yellow
+V √ n·V_PU·2 -15
+0xE017 57368 EV_soc_y_yr LED threshold: yel to yel/red V √ n·V_PU·2 -15
+0xE018 57369 EV_soc_yr_r LED threshold: yellow/red to red V √ n·V_PU·2 -15
+0xE019 57370 Emodbus_id MODBUS slave address - 1-247
+0xE01A 57371 Emeterbus_id MeterBus address - 1-15
+RESERVED
+RESERVED
+0xE01D 57374 EIb_lim Battery Current Limit A √ n·I_PU·2 -15
+RESERVED
+RESERVED
+0xE020 57377 EVa_ref_fixed_init Array V fixed target voltage V √ n·V_PU·2 -15
+0xE021 57378 EVa_ref_fixed_pct_init Array V fixed target V (% of Voc) % n·100·2 -16
+Read only section
+0xE080 57473 Ehourmeter_LO hourmeter h 0 to (2 24 -1)
+0xE081 57474 Ehourmeter_HI
+0xE082 57475 EAhc_r_LO Ah charge resetable Ah n·0.1
+0xE083 57476 EAhc_r_HI -
+0xE084 57477 EAhc_t_LO Ah charge total Ah n·0.1
+0xE085 57478 EAhc_t_HI -
+0xE086 57479 EkWhc_r kWh charge resetable kWh
+0xE087 57480 EkWhc_t kWh charge total kWh
+0xE088 57481 EVb_min Vb minimum V √ n·V_PU·2 -15
+0xE089 57482 EVb_max Vb maximum V √ n·V_PU·2 -15
+0xE08A 57483 EVa_max Va maximum V √ n·V_PU·2 -15
+0xE08B 57484 Etmr_eqcalendar days since last equalize days
+0xE08C 57485 Etmr_batt_service battery service timer days
+… RESERVED
+0xE0C0–
+0xE0C3
+57537 –
+57540
+Eserial Serial Number -
+0xE0CC 57548 Emodel Model: 0 = 45A, 1=60A version - 0 or 1
+0xE0CD 57549 Ehw_version Hardware version, vMajor.Minor - none
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 8/29 MS-002582 v11
+Read Coils (0x01), Read Discrete Inputs (0x02), Write Single Coil (0x05)
+PDU
+Addr
+Logical
+Addr
+Variable description
+0x0000 1 Equalize triggered
+0x0001 2 reserved
+0x0002 3 Charge disconnect (1 will force charger into a disconnect state)
+… 4-16 reserved
+0x0010 17 Clear Ah 8esettable (set only, will always read 0)
+0x0011 18 Clear Ah total (set only, will always read 0)
+0x0012 19 Clear kWh 8esettable (set only, will always read 0)
+0x0013 20 Reset battery service calendar
+0x0014 21 Clear faults
+0x0015 22 Clear Alarms
+0x0016 23 Force EEPROM update (set only, will always read 0)
+0x0017 24 reserved
+0x0018 25 Clear kWh total (set only, will always read 0)
+0x0019 26 Clear Vb_min and Vb_max (set only, will always read 0)
+… 27-240 reserved
+0x00F0 241 test a single phase (test mode only)
+… 242-255 reserved
+0x00FF 256 Reset control (respond and then reset?)
+0x1000 4096 Send Test Notification 1
+0x1001 4097 Send Test Notification 2
+0x1002 4098 Send Test Notification 3
+0x1003 4099 Send Test Notification 4
+0x10FF 4351 Reset Communications Server
+Write Single Register (0x06)
+Any write to EEPROM will set an “EEPROM changed” fault. The control must be reset to clear this fault.
+Note: No verify is performed on the write.
+See EEPROM table in Read Input Registers(0x04).
+Read Device Identification (0x2B, subcode 0x0E)
+Only supports “basic device identification (stream access)” (ID code 0x01)
+Object Id Object Name/Description Typical Value
+0x00 VendorName “Morningstar Corp.”
+0x01 Product Code “TS-MPPT-45” or
+“TS-MPPT-60”
+0x02 MajorMinorRevision
+(hardware major.minor. software revision)
+“v01.01.01”
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 9/29 MS-002582 v11
+Variables and Definitions
+Variable_name
+[Logical Address][PDU Address] (Units). Short description.
+Definition.
+Read Holding and Read Input Registers
+Located in processor RAM, updated continuously.
+V_PU hi, V_PU lo
+[1,2][0x0000, 0x0001] (V). voltage scaling.
+The scaling value for all voltages. The scaling value is defined as:
+V scaling = whole.fraction = [V_PU hi].[V_PU lo]
+Example:
+V_PU hi = 0x004E = 78
+V_PU lo = 0x03A6 = 934
+V_PU lo must be shifted by 16 (divided by 2^16) and then added to V_PU hi
+V scaling = 78 + 934/(2^16) = 78.01425
+I_PU hi, I_PU lo
+[3,4][0x0002, 0x0003] (V). current scaling.
+The scaling value for all currents. The scaling value is defined as:
+I scaling = whole.fraction = [I_PU hi].[I_PU lo]
+See the V_PU scaling example above
+ver_sw
+[5][0x0004] (). Software version.
+Firmware version for the controller. This is not the version number for the network software, which can
+be found in the web page views. The value is stored in binary coded decimal (BCD) format. Decimal
+version 12 is thus stored as 0x0012 not as 0x000c.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 10/29 MS-002582 v11
+Filtered ADC
+Vb
+[25][0x0018] (V). battery voltage, filtered.
+Battery voltage used for regulation by the TS-MPPT. This voltage will be the same as the Battery Sense
+voltage if the sense connections are connected and valid. Otherwise, this value is the same as Vb_term
+voltage.
+Vb_term
+[26][0x0019] (V). battery terminal voltage, filtered.
+Voltage measured directly at the battery power connections on the TriStar MPPT.
+Vb_sense
+[27][0x001A] (V). battery sense voltage, filtered.
+Voltage measured by the Battery Sense connections on the TriStar MPPT.
+Va
+[28][0x001B] (V). solar input voltage, filtered.
+Va is the terminal voltage of the solar input connection.
+Ib
+[29][0x001C] (A). battery charge current, filtered.
+Charging current to the battery as measured by on-board shunts.
+Ia
+[30][0x001D] (A). solar input current, filtered.
+Input current from the solar array.
+NOTE: Input current is not measured by precision shunts and may differ from the actual input current by
++/- 20%.
+Vp12
+[31][0x001E] (V). 12 volt supply.
+12 Volt power supply voltage.
+Vp3
+[32][0x001F] (V). 3 volt supply.
+3 Volt power supply voltage.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 11/29 MS-002582 v11
+Vmeter
+[33][0x0020] (V). MeterBus supply voltage.
+MeterBus power supply voltage.
+Vp1.8
+[34][0x0021] (V). 1.8 volt supply.
+1.8 Volt power supply voltage.
+V_ref
+[35][0x0022] (V). reference voltage.
+External voltage reference
+Temperatures
+T_hs
+[36][0x0023] (C). Heatsink Temperature.
+Sunsaver MPPT Heatsink temperature. Reported in degrees C.
+T_rts
+[37][0x0024] (C). RTS Temperature.
+Temperature as measured by the optional Remote Temperature Sensor(RTS). Reported in degrees C.
+T_batt
+[38][0x0025] (C). Battery Temperature.
+Battery temperature as measured by the ambient temperature sensor or the optional RTS (if connected).
+Reported in degrees C.
+Status
+Vb_slow
+[39][0x0026] (V). battery voltage, slow filtered (τ ≈ 1min) .
+Heavily filtered battery voltage reading. Ideal for use in threshold alarms.
+Ib_slow
+[40][0x0027] (A). battery charge current, slow filtered (τ ≈ 1min) .
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 12/29 MS-002582 v11
+Heavily filtered charging current value.
+Vb_min
+[41][0x0028] (V). minimum battery voltage.
+Long term minimum battery voltage. Resets when Ah(resettable) is reset.
+Vb_max
+[42][0x0029] (V). maximum battery voltage .
+Long term maximum battery voltage. Resets when Ah(resettable) is reset.
+hourmeter_HI / hourmeter_LO
+[43, 44][0x002A, 0x002B] (hrs).hour meter counter.
+Reports total hours of operation.
+Faults
+[45][0x002C] (bit-field). TS-MPPT self-diagnostic faults.
+Reports faults identified by self diagnostics. Each bit corresponds to a specific fault.
+Faults Table
+Bit Fault
+0 overcurrent
+1 FETs shorted
+2 software bug
+3 battery HVD
+4 array HVD
+5 settings switch changed
+6 custom settings edit
+7 RTS shorted
+8 RTS disconnected
+9 EEPROM retry limit
+10 Reserved
+11 Slave Control Timeout
+12 Fault 13
+13 Fault 14
+14 Fault 15
+15 Fault 16
+Example:
+Bit 0 is the LSB
+Faults = 0x0013 indicates the following faults have been detected:
+[bit 0] overcurrent
+[bit 1] MOSFETs shorted
+[bit 4] array HVD
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 13/29 MS-002582 v11
+alarm_HI / alarm_LO
+[47, 48][0x002E, 0x002F] (bitfield).Controller self-diagnostics alarms.
+Reports alarms identified by self diagnostics. Each bit corresponds to a specific alarm.
+Alarms Table
+Bit Alarm
+0 RTS open
+1 RTS shorted
+2 RTS disconnected
+3 Heatsink temp sensor open
+4 Heatsink temp sensor shorted
+5 High temperature current limit
+6 Current limit
+7 Current offset
+8 Battery sense out of range
+9 Battery sense disconnected
+10 Uncalibrated
+11 RTS miswire
+12 High voltage disconnect
+13 Undefined
+14 system miswire
+15 MOSFET open
+16 P12 voltage off
+17 High input voltage current limit
+18 ADC input max
+19 Controller was reset
+20 Alarm 21
+21 Alarm 22
+22 Alarm 23
+23 Alarm 24
+dip_switch
+[49][0x0030] (bit-field). setttings switch positions.
+Each bit in the bit-field corresponds to an individual DIP switch setting. Useful for remote applications
+where access to the TriStar MPPT to verify DIP positions is not feasible. Bit 0 (LSB) corresponds to
+settings switch 1.
+LED_state
+[50][0x0031] ( ).
+Reports the LED state.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 14/29 MS-002582 v11
+Value LED State
+0 LED_START
+1 LED_START2
+2 LED_BRANCH
+3 FAST GREEN BLINK
+4 SLOW GREEN BLINK
+5 GREEN BLINK, 1HZ
+6 GREEN_LED
+7 UNDEFINED
+8 YELLOW_LED
+9 UNDEFINED
+10 BLINK_RED_LED
+11 RED_LED
+12 R-Y-G ERROR
+13 R/Y-G ERROR
+14 R/G-Y ERROR
+15 R-Y ERROR (HTD)
+16 R-G ERROR (HVD)
+17 R/Y-G/Y ERROR
+18 G/Y/R ERROR
+19 G/Y/R x 2
+Charger
+Charge_state
+[51][0x0032] ( ). Charge state.
+Reports the charge state.
+Value Charge State
+0 START
+1 NIGHT_CHECK
+2 DISCONNECT
+3 NIGHT
+4 FAULT
+5 MPPT
+6 ABSORPTION
+7 FLOAT
+8 EQUALIZE
+9 SLAVE
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 15/29 MS-002582 v11
+V_target
+[52][0x0033] (V). Target Voltage.
+Voltage to which the battery will be charged at any given time. This value changes with each charge
+stage and is temperature compensated.
+Ahc_r_HI / Ahc_r_LO
+[53,54][0x0034, 0x0035] (ah).Charge amp-hours (reset-able counter).
+Reports total solar amp-hours since last ah reset.
+Ahc_t_HI / Ahc_t_LO
+[55,56][0x0036, 0x0037] (ah).Charge amp-hours (Total cumulative counter).
+Reports total solar amp-hours since last ah reset.
+kWhc_r
+[57][0x0038] (kWh).Charge kilowatt-hours (reset-able counter).
+Reports total solar kilowatt-hours since last ah/kWh reset.
+kWhc_t
+[58][ 0x0039] (kWh).Charge kilowatt-hours (total counter).
+Reports total solar kilowatt-hours.
+MPPT
+Power_out
+[59][0x003A] (W). Charge output power.
+Output power to the battery.
+Power_in
+[60][0x003B] (W). Array input power.
+Input power from the solar array. Input current is not measured by precision shunts, therefore the
+reported input power may have significant error.
+Sweep_Pmax
+[61][0x003C] (W). Maximum array power.
+Maximum power output of the solar array found during last sweep.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 16/29 MS-002582 v11
+Sweep_Vmp
+[62][0x003D] (V). Solar array Vmp.
+Maximum power voltage of the solar array found during last sweep.
+Sweep_Voc
+[63][0x003E] (V). Solar array Voc.
+Open circuit voltage of the solar array found during last sweep.
+Logger
+Vb_min_daily
+[65][0x0040] (V). Today’s minimum battery voltage.
+Minimum battery voltage measured today. This value is stored in the daily record at the end of each
+charging day. A new daily record is created X hours after NIGHT state.
+Vb_max_daily
+[66][0x0041] (V). Today’s maximum battery voltage.
+Maximum battery voltage measured today. This value is stored in the daily record at the end of each
+charging day. A new daily record is created X hours after NIGHT state.
+Va_max_daily
+[67][0x0042] (V). Today’s maximum array voltage.
+Maximum battery voltage measured today. This value is stored in the daily record at the end of each
+charging day. A new daily record is created X hours after NIGHT state.
+Ahc _daily
+[68][0x0043] (Ah). Today’s total charge amp-hours.
+Total charging amp-hours accumulated today. This value is stored in the daily record at the end of each
+charging day. A new daily record is created X hours after NIGHT state.
+whc _daily
+[69][0x0044] (wh). Today’s total charge watt--hours.
+Total watt-hours accumulated today. This value is stored in the daily record at the end of each charging
+day. A new daily record is created at dawn the next day. Reports increments of 10 Whrs.
+flags_daily
+[70][0x0045] (bit-field). Today’s event flags (sticky).
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 17/29 MS-002582 v11
+Reports daily flags, as defined below, that occurred today.
+Bit Flag
+0 (LSB) Reset detected
+1 Equalize triggered
+2 Entered float
+3 an alarm occurred
+4 a fault occurred
+Pout_max_daily
+[71][0x0046] (bit-field). Maximum power out today.
+Reports maximum power delivered to the battery today.
+Tb_min_daily
+[72][0x0047] (bit-field). Today’s minimum battery temperature.
+Reports the lowest battery temperature that occurred today.
+Tb_max_daily
+[73][0x0048] (bit-field). Today’s maximum battery temperature.
+Reports the highest battery temperature that occurred today.
+fault_daily
+[74][0x0049] (bit-field). Today’s self-diagnostic faults (sticky).
+Reports faults identified by self diagnostics that occurred today. Each bit corresponds to a specific fault.
+If a bit is set, that fault occurred at least once today. Bit order is identical to the fault bitfield.
+alarm_HI_Daily / alarm_LO_Daily
+[76,77][0x004B, 0x004C] (bitfield). Today’s controller self-diagnostics alarms (sticky).
+Reports alarms identified by self diagnostics that occurred today. Each bit corresponds to a specific
+alarm. If a bit is set, that alarm occurred at least once today. Bit order is identical to the
+alarm_hi/alarm_lo bitfield.
+time_ab_daily
+[78][0x004D] (s). Cumulative time in Absorption today.
+Reports the cumulative number of seconds the battery has been in the Absorption charge stage today.
+Counter resets at night.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 18/29 MS-002582 v11
+time_eq_daily
+[79][0x004E] (s). Cumulative time in Equalization today.
+Reports the cumulative number of seconds the battery has been in the Equalization charge stage today.
+Counter resets at night.
+time_fl_daily
+[80][0x004F] (s). Cumulative time in Float today.
+Reports the cumulative number of seconds the battery has been in the Float charge stage today. Counter
+resets at night.
+Ib_ref_slave
+[89][0x0058] (A). Battery current regulation override
+Write a current value to this register to override the battery regulation. This allows for system control of
+1 or more controllers via Modbus. Writing a non-zero, positive value to this register forces the controller
+into “slave” state. The register value must be updated every 60 seconds or less, else the controller will
+fault. Writing to the register after a timeout will exit fault state and resume operation. Write a negative
+value to disable slave control. Note: other protections, limits, or foldbacks may reduce battery current
+below the commanded slave current value. The battery current regulator uses the minimum of all current
+references.
+Vb_ref_slave
+[90][0x0059] (V). Battery voltage regulation override
+Write a voltage value to this register to override the battery regulation. This allows for system control of
+1 or more controllers via Modbus. Writing a non-zero value to this register forces the controller into
+“slave” state. The register value must be updated every 60 seconds or less, else the controller will fault.
+Writing to the register after a timeout will exit fault state and resume operation. Write a negative value
+to disable slave control.
+Va_ref_fixed
+[91][0x005A] (V). Array Voltage fixed target
+Write a voltage value to this register to fix the Array input voltage to a specific value. If this register is a
+non-zero value, the MPPT function of the controller will stop (sweeping and tracking are disabled) and
+the array input will be fixed to the specified voltage. This value can be written at anytime during
+operation to adjust the array voltage target value. On start-up, this value is initialized with the non-
+volatile EEPROM value in register 0xE020.
+Supported in processor A - V09 firmware and later.
+Va_ref_fixed_pct
+[92][0x005B] (%). Array Voltage percent of Voc voltage target
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 19/29 MS-002582 v11
+Write a value to this register to fix the Array input voltage to a percent of the Array open circuit voltage.
+If this register is a non-zero value, the MPPT function of the controller will stop (sweeping and tracking
+are disabled) and the array target voltage will be fixed to the specified % of array Voc. The controller
+will perform periodic Voc checks and move the array voltage if needed to maintain the correct % target.
+If this register value is changed, the array voltage will not adjust until the next Voc check.
+On start-up, this value is initialized with the non-volatile EEPROM value in register 0xE021.
+Supported in processor A - V09 firmware and later.
+Note: if the Va_ref_fixed (0x005A) register is non-zero, it will override this setting.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 20/29 MS-002582 v11
+EEPROM
+TCP Network Settings
+HTTPPort
+[5404][0x151B](). HTTP port number
+Port number assigned to the web server. Port 80 default.
+MBIPPort
+[5405][0x151C](). MODBUS IP port number
+Port number used for MODBUS IP requests to the controller. Port 502 default.
+NetRules
+[5406][0x151D](). Enable / Disable IP bridging to EIA-485
+Set the register bit 0 = 1 to enable bridging of MODBUS requests via Ethernet to the EIA-485 port. If
+this bit is set, any MODBUS requests received through Ethernet that are not addressed to the controller
+will be sent out to the EIA-485 port for other devices to receive/respond. All other bits reserved for
+future use.
+Note: all requests, read and write, will be bridged to the EIA-485 network!
+SNMPTrapRecPort
+[5407][0x151E](). Trap receive port
+Port number on which to broadcast a SNMP message. Port 162 default.
+Ethernet Power Save Mode
+[5408][0x151F](). “Green Ethernet” feature on/off
+Set bit 0 = 1 to turn on the Green Ethernet feature. When on, the Ethernet port will power down unless
+an Ethernet connection is detected. The controller will check periodically for an established connection.
+Conserves power in systems with no Ethernet connection. Off by default.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 21/29 MS-002582 v11
+Charge Settings
+EV_absorp
+[57345][0xE000](V). Absorption voltage @ 25ºC.
+The battery will charge at 100% charge current until battery voltage reaches this setpoint. The controller
+will begin to taper input current so that this setpoint is maintained, but not exceeded.
+EV_float
+[57346][0xE001](V). Float voltage @ 25ºC
+After Et_float seconds in absorption, when the battery is fully charged, the battery will transition to this
+lower voltage charge setting to reduce gassing.
+Set to zero to disable float stage
+Et_absorp
+[57347][0xE002](seconds) time before entering float
+Defines the length of time in Absorption charge stage before transitioning to Float stage.
+Et_absorp_ext
+[57348][0xE003](seconds) time before entering float due to low battery
+If the battery voltage discharges too low during the previous night, this value allows the user to specify a
+longer period of time before entering float stage.
+EV_absorp_ext
+[57349][0xE004](V). Voltage that triggers absorption extension time
+Battery voltage that will trigger a longer period of time (Et_absorp_ext) before entering float.
+EV_float_cancel
+[57350][0xE005](V). Battery voltage threshold to cancel float
+A battery voltage threshold that will cancel float on the next charge cycle. If the battery discharged too
+low the previous night, the user may want to cancel float for the next day.
+Et_float_exit_cum
+[57351][0xE006](V). Exit float timer
+Specify (cumulative) amount of time below float voltage before exiting the float stage. Battery voltage
+may drop below the target float voltage due to insufficient charge current or a system load draws more
+current from the battery than the array can provide.
+EV_eq
+[57352][0xE007](V). Equalize voltage @ 25ºC
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 22/29 MS-002582 v11
+Battery equalize voltage. Periodic equalization equalizes cell voltages, bubbles the electrolyte, and helps
+prevent sulfation of the battery.
+Set to zero to disable equalization
+Et_eqcalendar
+[57353][0xE008](days). days between eq cycles
+Specify the number of days between equalizations. Equalizing on a calendar basis ensures proper
+maintenance of batteries.
+Et_eq_above
+[57354][0xE009](seconds) equalize time limit above Vreg.
+Equalization will timeout after the specified number of seconds above PWM regulation voltage. If the
+battery is charged above absorption voltage but has not yet reached the equalization setting, this value
+serves as a safety timeout to prevent partial equalizations for extended periods of time.
+Et_eq_reg
+[57355][0xE00A](seconds) equalize time limit at Veq
+Equalization will stop after the specified number of seconds at the equalization setpoint voltage.
+Et_batt_service
+[57356][0xE00B](days) battery service reminder
+Specifies the number of days between battery service reminders. Sets an alarm, prompting the user to
+check batteries for water, health, etc. Clear the alarm with the pushbutton, meter, or MODBUS alarm
+reset command.
+EV_tempcomp
+[57358][0xE00D](V/C). temperature compensation.
+Battery chemistry changes with temperature. Temperature compensation coefficient specifies the
+amount that regulation voltage will be shifted with temperature. 25ºC reference, the negative is implied
+(write a positive value). 12V lead-acid battery temperature compensation is approximately 0.03 V/C
+EV_hvd
+[57359][0xE00E] High Voltage Disconnect @ 25ºC
+Flag a fault/alarm if the battery voltage exceeds this setpoint. Also attempts to open the MOSFETs to
+stop charging. Set to zero to disable HVD
+EV_hvr
+[57360][0xE00F](V) High Voltage Reconnect
+The HVD fault/alarm will be cleared once the battery voltage drops below this setpoint.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 23/29 MS-002582 v11
+Evb_ref_lim
+[57361][0xE010](V) Maximum regulation limit
+An absolute limit on the battery regulation voltage. This is not a temperature compensated value.
+Protects high voltage sensitive system loads. Set to zero to disable.
+ETb_max
+[57362][0xE011](C) Maximum temperature compensation limit
+Maximum temperature to clamp temperature compensation.
+ETb_min
+[57363][0xE012](C) Minimum temperature compensation limit
+Maximum temperature to clamp temperature compensation.
+EV_soc_g_gy
+[57366][0xE015](V). green to green/yellow limit
+LED transition setpoint. Specifies the battery voltage at which the LED state will change from Green to
+Green/Yellow.
+EV_soc_gy_y
+[57367][0xE016](V). LED Green/Yellow to Yellow limit
+LED transition setpoint. Specifies the battery threshold voltage at which the LEDs will change from
+green/yellow to yellow indication.
+EV_soc_y_yr
+[57368][0xE017](V). LED Yellow to Yellow/Red limit
+LED transition setpoint. Specifies the battery threshold voltage at which the LEDs will change from
+Yellow to Yellow/Red indication.
+EV_soc_yr_r
+[57369][0xE018](V). LED Yellow/Red to Red limit
+LED transition setpoint. Specifies the battery threshold voltage at which the LEDs will change from
+Yellow/Red to Red indication.
+Emodbus _id
+[57370][0xE019](). MODBUS ID
+MODBUS address which uniquely identifies the controller on the MODBUS network.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 24/29 MS-002582 v11
+Emeter _id
+[57371][0xE01A](). MeterBus ID
+Address which uniquely identifies the controller on the Morningstar proprietary Meter Bus network.
+Devices are daisy-chained on the Meter Bus network via the RJ-11 connections. Addresses are limited to
+the range of 1-15
+EIb_lim
+[57374][0xE01D](A). Battery Current Limit
+Set to a non-zero value to limit the maximum battery current. Set to zero to use the default 60 Amp
+current limit.
+EVa_ref_fixed_init
+[57377][0xE020](V). Array Voltage fixed target - initialize
+Write a voltage value to this register to fix the Array input voltage to a specific value. If this register is a
+non-zero value, the MPPT function of the controller will be disabled (sweeping and tracking are
+disabled) and the array input will be fixed to the specified voltage. On start-up, the value in this register
+is copied to the volatile RAM register 0x005A, which allows for real-time control of Va.
+EVa_ref_fixed_pct_init
+[57378][0xE021](%). Array Voltage percent of Voc voltage target - initialize
+Write a value to this register to fix the Array input voltage to a percent of the Array open circuit voltage.
+If this register is a non-zero value, the MPPT function of the controller will be disabled (sweeping and
+tracking are disabled) and the array target voltage will be fixed to the specified % of array Voc. The
+controller will perform periodic Voc checks and move the array voltage if needed to maintain the correct
+% target. On start-up, the value in this register is copied to the volatile RAM register 0x005B, which
+allows for real-time control of Va.
+Note: if the Va_ref_fixed_init (0xE021) register is non-zero, it will override this setting.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 25/29 MS-002582 v11
+Read-Only Variables
+Ehourmeter_LO / Ehourmeter_HI
+[57473,57474][0xE080,0xE081](hours). Hourmeter
+Cumulative hours the controller has been running. Non-volatile, written every 24hrs.
+EAhc_r_LO / EAhc_r_HI
+[57475,57476][0xE082,0xE083](amp-hours). Charge resetable Ah
+Cumulative amp-hours typically used for short-term logging. Resetable.
+EAhc_t_LO / EAhc_t_HI
+[57477,57478][0xE084,0xE085](amp-hours). Charge total Ah
+Cumulative amp-hours for long term logging. Can be reset if needed.
+EkWhc_r
+[57479][0xE086](kWh). Charge Kilowatt hours resettable
+Cumulative charging kilowatt hours. Resettable counter.
+EkWhc_t
+[57480][0xE087](kWh). Charge Kilowatt hours total
+Cumulative charging kilowatt hours. Total counter.
+EVb_min
+[57481][0xE088](V). Minimum battery voltage
+Minimum battery voltage over last 24 hours. Written once every 24hrs.
+EVb_max
+[57482][0xE089](V). Maximum battery voltage
+Maximum battery voltage over last 24 hours. Written once every 24hrs.
+EVa_max
+[57483][0xE08A](V). Maximum array voltage
+Maximum array voltage over last 24 hours. Written once every 24hrs.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 26/29 MS-002582 v11
+Etmr_eqcalendar
+[57484][0xE08B](V). Equalize calendar timer
+Number of days since last equalize.
+Etmr_batt_service
+[57485][0xE08C](days). days since last battery service
+Reports the number of days since the last battery service reminder.
+Eserial
+[57537-57540][0xE0C0 – 0xE0C3](ASCII). Controller serial number
+ASCII string of characters that represents the serial number.
+Example serial number: 01234567
+0xE0C0 = 0x3130 [1][0]
+0xE0C1 = 0x3332 [3][2]
+0xE0C2 = 0x3534 [5][4]
+0xE0C3 = 0x3736 [7][6]
+Emodel
+[57548][0xE0CC](). Controller model flag.
+0 = TSMPPT-45, 1=TSMPPT-60
+Ehw_version
+[57549][0xE0CD](). Hardware version.
+Not ASCII. Major version stored in upper byte, minor version stored in lower byte.
+0xE0CD = 0x0102  HW version: 1.2
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 27/29 MS-002582 v11
+Examples
+Read Holding Register, Scaling a voltage value
+Read and scale the following value:
+Variable (RAM): Battery Voltage
+Register Address: 0x0018
+The voltage scaling term is stored in variable V_PU at addresses 0x0000 and 0x0001.
+Suppose the following values are read from RAM:
+Address Value(hex) Variable Name
+0x0000 0x007B V_PU HI byte
+0x0001 0xE041 V_PU LO byte
+0x0018 0x0DB0 Battery Voltage value
+1. Compute voltage scaler
+Whole term = 0x007B  123
+Fractional term = 0xE041 / 2^16  0.876
+Voltage scaler = 123 + 0.876 = 123.876
+Scaling for this variable is: n* V_PU * 2 -15 (as listed in the table of RAM variables)
+2. Convert hexadecimal Vbattery register value to decimal
+0x0DB0  3504
+3. Scale Vbattery value
+Vbattery = ( 3504 * 123.876 ) / 32768 = 13.25 Volts
+Read Holding Register, 2 Word values
+Variable (RAM): hours (hourmeter)
+LO Register Address: 0x002A
+HI Register Address: 0x002B
+Scaling for this variable: none
+1. read LO Register value(hex): 0x13D8
+2. read HI Register value(hex): 0x0022
+3. combine register values(hex): 0x002213D8
+4. Convert to decimal: 2,233,304 hours
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 28/29 MS-002582 v11
+References
+• Visit http://www.modbus-ida.org/ for full protocol documentation, news, and technical resources
+• MODBUS® Protocol Reference Guide, Modicon, June 1996, PI-MODBUS-300 Rev.J
+• MODBUS® Application Protocol Specification, modbus.org, 8May02,
+• Modbus_application_protocol_v1
+Document Revision History
+V01: First Release
+V02: added EEPROM variable EV_soc_y_yr (0xE017) to variable list, shifted remaining variables
+Added EEPROM variable serial number (0xE0C0)
+Added EEPROM variable Ehdw_version (0xE0CD)
+Specified some missing scaling values
+V03: Reordered address space for RAM
+Added RAM variable sw_ver (0x0005)
+Added flags, PoutMax, TbMin, TbMax to daily logged values list
+V04: Changed scaling values for RAM power supply voltages
+Added Vb_ref_slave variable for modbus control of regulation
+Changed scaling of daily Whr charge from 0.1 to 1 (no scaling)
+Change to NetFlags (0x1517), 0x4000 turns on DHCP.
+Modified the default network settings on front page. DHCP enabled by default.
+Documented active network settings, netbios name, and ethernet power save mode register.
+MACAddress bytes are READ-ONLY
+V05: Added definitions for EEPROM values
+V06: If DHCP fails, default IP is 192.168.1.253 – updated this info in Parameters section.
+V07: Added va_ref_fixed RAM variable and definition (0x005A).
+Added va_ref_fixed_pct RAM variable and definition (0x005B).
+Added va_ref_fixed EEPROM variable and definition (0xE020).
+Added va_ref_fixed_pct EEPROM variable and definition (0xE021).
+Added EIb_lim EEPROM variable and definition (0xE01D).
+Fixed the scaling in the Examples scaling section, step 1 – is now 2^-15
+V08: Clarified 1-2 stop bits
+Added signed data column
+Added sw_ver BCD coding information
+Added Vb_min/max coil reset command
+Correct adc_v_ref scaling
+kWhc resettable and total definitions were incorrectly documented.
+V09: Added VLAN registers for Processor B v8.21 Beta
+V10: Updated/corrected Fault bit field (0x002C), Slave timeout fault bit in incorrect location: bit10 ->
+bit11
+V10.2 Corrected minor typos in array V scaling, used I_scaling value and wrong units.
+V10.5 Added two columns to Modbus table that note which fields are being sent to the web service, and
+available via SNMP.
+TriStar MPPT MODBUS Document
+http://www.morningstarcorp.com 29/29 MS-002582 v11
+V11 Add Ib_ref_slave register location and definition in the glossary. Assigned a control number and
+moved into controlled documentation.
+
