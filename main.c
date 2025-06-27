@@ -1,57 +1,57 @@
 #include "common.h"
 #include "modbus.h"
-
+#include "settings.h"
 
 
 
 
 const char *ProcessOp(const char *ptr, double *value)
 {
-char *Token=NULL;
+    char *Token=NULL;
 
-ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
+    ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
 
-if (strcmp(Token, "*")==0)
-{
-	ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
-	*value=*value * strtof(Token, NULL);
-}
-else if (strcmp(Token, "/")==0)
-{
-	ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
-	*value=*value / strtof(Token, NULL);
-}
-else if (strcmp(Token, "-")==0)
-{
-	ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
-	*value=*value - strtof(Token, NULL);
-}
-else if (strcmp(Token, "+")==0)
-{
-	ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
-	*value=*value + strtof(Token, NULL);
-}
+    if (strcmp(Token, "*")==0)
+    {
+        ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
+        *value=*value * strtof(Token, NULL);
+    }
+    else if (strcmp(Token, "/")==0)
+    {
+        ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
+        *value=*value / strtof(Token, NULL);
+    }
+    else if (strcmp(Token, "-")==0)
+    {
+        ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
+        *value=*value - strtof(Token, NULL);
+    }
+    else if (strcmp(Token, "+")==0)
+    {
+        ptr=GetToken(ptr, "\\S|*|/|+|-", &Token, GETTOKEN_MULTI_SEP | GETTOKEN_INCLUDE_SEP);
+        *value=*value + strtof(Token, NULL);
+    }
 
-Destroy(Token);
+    Destroy(Token);
 
-return(ptr);
+    return(ptr);
 }
 
 
 double ProcessConvert(uint32_t word, const char *Convert)
 {
-const char *ptr;
-double value;
+    const char *ptr;
+    double value;
 
-value=(double) word;
+    value=(double) word;
 
-ptr=Convert;
-while (ptr)
-{
-ptr=ProcessOp(ptr, &value);
-}
+    ptr=Convert;
+    while (ptr)
+    {
+        ptr=ProcessOp(ptr, &value);
+    }
 
-return(value);
+    return(value);
 }
 
 
@@ -74,13 +74,13 @@ const char *OutputItem(const char *DataPtr, const char *Name, const char *Type, 
     else if (strcmp(Type, "32")==0)
     {
         quad=ModBusReadUint32(&dptr);
-				value=ProcessConvert((uint32_t) quad, Convert);
+        value=ProcessConvert((uint32_t) quad, Convert);
         printf("  %s: %.2f\n", Name, value);
     }
     else if (strcmp(Type, "16")==0)
     {
         word=ModBusReadUint16(&dptr);
-				value=ProcessConvert((uint32_t) word & 0xFFFF, Convert);
+        value=ProcessConvert((uint32_t) word & 0xFFFF, Convert);
         printf("  %s: %.2f\n", Name, value);
     }
 
@@ -92,22 +92,25 @@ void ReadBlock(char *Host, int BaseAddr, ListNode *Values)
 {
     char *Data=NULL, *Type=NULL, *Convert=NULL;
     const char *ptr, *dptr;
-		ListNode *Curr;
+    ListNode *Curr;
     int len;
 
     Data=SetStrLen(Data, 1024);
     len=ModbusReadDataBlock(Host, BaseAddr, Data);
-
+    if (len > 0)
+    {
     dptr=Data;
 
-		Curr=ListGetNext(Values);
+    Curr=ListGetNext(Values);
     while (Curr)
     {
-		ptr=GetToken((const char *) Curr->Item, ",", &Type, 0);
-		ptr=GetToken(ptr, ",", &Convert, 0);
-    dptr=OutputItem(dptr, Curr->Tag, Type, Convert);
-		Curr=ListGetNext(Curr);
+        ptr=GetToken((const char *) Curr->Item, ",", &Type, 0);
+        ptr=GetToken(ptr, ",", &Convert, 0);
+        dptr=OutputItem(dptr, Curr->Tag, Type, Convert);
+        Curr=ListGetNext(Curr);
     }
+    }
+    else printf("ERROR: Failed to connect to or read from modbus device at %s\n", Host);
 
     Destroy(Convert);
     Destroy(Type);
@@ -142,7 +145,7 @@ void ProcessDataBlock(ListNode *Block)
     long BaseAddr=0;
 
     printf("%s\n", Block->Tag);
-		BlockItems=(ListNode *) Block->Item;
+    BlockItems=(ListNode *) Block->Item;
     Curr=ListGetNext(BlockItems);
     while (Curr)
     {
@@ -159,9 +162,12 @@ void ProcessDataBlock(ListNode *Block)
 }
 
 
-main(int argc, const char *argv[])
+
+
+int main(int argc, const char *argv[])
 {
     PARSER *P=NULL, *Curr;
+    TSettings *Settings;
 
     if (argc < 2)
     {
@@ -169,8 +175,12 @@ main(int argc, const char *argv[])
         return(1);
     }
 
+    Settings=ParseCommandLine(argc, argv);
 
-    P=ConfigRead(argv[1]);
+    if (StrValid(Settings->Proxy)) SetGlobalConnectionChain(Settings->Proxy);
+
+
+    P=ConfigRead(Settings->IniFile);
     Curr=ListGetNext(P);
     while (Curr)
     {
@@ -178,4 +188,5 @@ main(int argc, const char *argv[])
         Curr=ListGetNext(Curr);
     }
 
+    return(0);
 }

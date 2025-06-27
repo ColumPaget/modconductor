@@ -127,7 +127,7 @@ int ModbusReadDataBlock(const char *Host, int BaseAddr, char *Data)
 {
     char *Tempstr=NULL;
     STREAM *S;
-    int len;
+    int len=-1;
 
     Tempstr=FormatStr(Tempstr, "tcp:%s:502", Host);
     S=STREAMOpen(Tempstr, "");

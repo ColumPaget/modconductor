@@ -1,4 +1,4 @@
-OBJ=modbus.o
+OBJ=modbus.o settings.o
 LIBS=@LIBUSEFUL_BUNDLED@ @LIBS@
 FLAGS=-g @DEFS@
 
@@ -8,6 +8,10 @@ all: $(OBJ) @LIBUSEFUL_BUNDLED@
 
 modbus.o: modbus.h modbus.c
 	gcc -c modbus.c
+
+settings.o: settings.h settings.c
+	gcc -c settings.c
+
 
 libUseful-bundled/libUseful.a:
 	$(MAKE) -C libUseful-bundled
