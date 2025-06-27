@@ -1,10 +1,12 @@
-OBJ=modbus.o settings.o
+OBJ=modbus.o settings.o interogate_device.o
 LIBS=@LIBUSEFUL_BUNDLED@ @LIBS@
 FLAGS=-g @DEFS@
 
 all: $(OBJ) @LIBUSEFUL_BUNDLED@ 
 	gcc $(FLAGS) -omodconductor.exe $(OBJ) main.c $(LIBS)
 
+interogate_device.o: interogate_device.h interogate_device.c
+	gcc -c interogate_device.c
 
 modbus.o: modbus.h modbus.c
 	gcc -c modbus.c
@@ -17,4 +19,4 @@ libUseful-bundled/libUseful.a:
 	$(MAKE) -C libUseful-bundled
 
 clean:
-	rm -rf *.o *.exe */*.o */*.a */*.so.* */*.so
+	rm -rf *.orig *.o *.exe */*.o */*.a */*.so.* */*.so

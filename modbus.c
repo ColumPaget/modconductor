@@ -123,7 +123,7 @@ uint32_t ModBusReadUint32(const char **Input)
 }
 
 
-int ModbusReadDataBlock(const char *Host, int BaseAddr, char *Data)
+int ModbusReadDataBlock(const char *Host, int BaseAddr, char *Data, int Len)
 {
     char *Tempstr=NULL;
     STREAM *S;
@@ -134,7 +134,7 @@ int ModbusReadDataBlock(const char *Host, int BaseAddr, char *Data)
 
     if (S)
     {
-        len=ModbusReadAddress(S, BaseAddr, 16, Data);
+        len=ModbusReadAddress(S, BaseAddr, Len / 2, Data);
         STREAMClose(S);
     }
 

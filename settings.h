@@ -4,10 +4,14 @@
 
 #include "common.h"
 
+#define ACT_DISPLAY 0
+#define ACT_INTEROGATE 1
 
 typedef struct
 {
+int Action;
 char *IniFile;
+char *Host;
 char *Proxy;
 } TSettings;
 

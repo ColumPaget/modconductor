@@ -17,6 +17,11 @@ TSettings *ParseCommandLine(int argc, const char *argv[])
         if (strcmp(arg, "-f")==0) Settings->IniFile=CopyStr(Settings->IniFile, CommandLineNext(CMD));
         else if (strcmp(arg, "-P")==0) Settings->Proxy=CopyStr(Settings->Proxy, CommandLineNext(CMD));
         else if (strcmp(arg, "-proxy")==0) Settings->Proxy=CopyStr(Settings->Proxy, CommandLineNext(CMD));
+        else if (strcmp(arg, "-i")==0)
+        {
+            Settings->Action=ACT_INTEROGATE;
+            Settings->Host=CopyStr(Settings->Host, CommandLineNext(CMD));
+        }
         else Settings->IniFile=CopyStr(Settings->IniFile, arg);
 
         arg=CommandLineNext(CMD);

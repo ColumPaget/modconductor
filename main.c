@@ -1,7 +1,7 @@
 #include "common.h"
 #include "modbus.h"
 #include "settings.h"
-
+#include "interogate_device.h"
 
 
 
@@ -83,6 +83,13 @@ const char *OutputItem(const char *DataPtr, const char *Name, const char *Type, 
         value=ProcessConvert((uint32_t) word & 0xFFFF, Convert);
         printf("  %s: %.2f\n", Name, value);
     }
+    else if (strcmp(Type, "8")==0)
+    {
+        word=ModBusReadUint16(&dptr);
+        value=ProcessConvert((uint32_t) word & 0xFF, Convert);
+        printf("  %s: %.2f\n", Name, value);
+    }
+
 
     return(dptr);
 }
@@ -95,20 +102,20 @@ void ReadBlock(char *Host, int BaseAddr, ListNode *Values)
     ListNode *Curr;
     int len;
 
-    Data=SetStrLen(Data, 1024);
-    len=ModbusReadDataBlock(Host, BaseAddr, Data);
+    Data=SetStrLen(Data, 4096);
+    len=ModbusReadDataBlock(Host, BaseAddr, Data, 4096);
     if (len > 0)
     {
-    dptr=Data;
+        dptr=Data;
 
-    Curr=ListGetNext(Values);
-    while (Curr)
-    {
-        ptr=GetToken((const char *) Curr->Item, ",", &Type, 0);
-        ptr=GetToken(ptr, ",", &Convert, 0);
-        dptr=OutputItem(dptr, Curr->Tag, Type, Convert);
-        Curr=ListGetNext(Curr);
-    }
+        Curr=ListGetNext(Values);
+        while (Curr)
+        {
+            ptr=GetToken((const char *) Curr->Item, ",", &Type, 0);
+            ptr=GetToken(ptr, ",", &Convert, 0);
+            dptr=OutputItem(dptr, Curr->Tag, Type, Convert);
+            Curr=ListGetNext(Curr);
+        }
     }
     else printf("ERROR: Failed to connect to or read from modbus device at %s\n", Host);
 
@@ -162,11 +169,24 @@ void ProcessDataBlock(ListNode *Block)
 }
 
 
+void DeviceDisplayFromIni(const char *IniPath)
+{
+    PARSER *P=NULL, *Curr;
+
+    P=ConfigRead(IniPath);
+    Curr=ListGetNext(P);
+    while (Curr)
+    {
+        ProcessDataBlock(Curr);
+        Curr=ListGetNext(Curr);
+    }
+}
+
+
 
 
 int main(int argc, const char *argv[])
 {
-    PARSER *P=NULL, *Curr;
     TSettings *Settings;
 
     if (argc < 2)
@@ -179,14 +199,17 @@ int main(int argc, const char *argv[])
 
     if (StrValid(Settings->Proxy)) SetGlobalConnectionChain(Settings->Proxy);
 
-
-    P=ConfigRead(Settings->IniFile);
-    Curr=ListGetNext(P);
-    while (Curr)
+    switch (Settings->Action)
     {
-        ProcessDataBlock(Curr);
-        Curr=ListGetNext(Curr);
+    case ACT_INTEROGATE:
+        InterogateDevice(Settings->Host);
+        break;
+
+    default:
+        DeviceDisplayFromIni(Settings->IniFile);
+        break;
     }
+
 
     return(0);
 }
