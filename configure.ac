@@ -7,11 +7,6 @@ AC_LANG([C])
 AC_PROG_MAKE_SET 
 AC_PROG_INSTALL 
 
-# Autoupdate added the next two lines to ensure that your configure
-# script's behavior did not change.  They are probably safe to remove.
-AC_CHECK_INCLUDES_DEFAULT
-AC_PROG_EGREP
- 
 AC_SYS_LARGEFILE
 
 AC_ARG_WITH(libuseful, [  --with-libuseful		use system-wide libUseful (default=auto) ], cf_system_libuseful=$withval )

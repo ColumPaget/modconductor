@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-void InterogateDevice(const char *Host);
+void InterogateDevice(const char *Host, int BaseAddr);
 
 #endif

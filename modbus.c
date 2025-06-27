@@ -13,28 +13,36 @@ int ModbusReadAddress(STREAM *S, int Address, int Len, char *Bytes)
     Tempstr=SetStrLen(Tempstr, 1024);
     ptr=Tempstr;
 
+    //transation ID should really be unique every time
     word=htons(TransactionID);
     memcpy(ptr, &word, 2);
     ptr+=2;
 
+    //protocol identifier (0x0 for modbus over TCP)
     word=htons(0x0);
     memcpy(ptr, &word, 2);
     ptr+=2;
 
+    //remaining bytes in this frame
     word=htons(0x6);
     memcpy(ptr, &word, 2);
     ptr+=2;
 
+
+    //'unit identifier', not normally used but set to 1 here
     *ptr=0x1;
     ptr++;
 
+    //this is the 'instruction code', in this case 0x3 is 'read from registers'
     *ptr=0x3;
     ptr++;
 
+    //base address to start reading from
     word=htons(Address);
     memcpy(ptr, &word, 2);
     ptr+=2;
 
+    //number of registers to read
     word=htons(Len);
     memcpy(ptr, &word, 2);
     ptr+=2;
@@ -61,22 +69,37 @@ int ModbusReadAddress(STREAM *S, int Address, int Len, char *Bytes)
 
 
     ptr=Tempstr;
-    word=htons( *(uint16_t *) ptr);
+    word=ntohs( *(uint16_t *) ptr);
 
 //   if (word==TransactionID) printf("Transaction Matches\n");
 
+    //protocol indentifer will consume another two bytes here
     ptr=Tempstr+4;
-    word=htons( *(uint16_t *) ptr);
-
-//   printf("Packet Length: %u\n", word & 0xFFFF);
 
 
-    ptr=Tempstr+8;
-    out_len=*ptr & 0xFF;
+    //remaining bytes in packet
+    word=ntohs( *(uint16_t *) ptr);
+//   printf("Reply Length: %u\n", word & 0xFFFF);
+    ptr+=2;
+
+    ptr++; //skip unit identifier
+
+    if (*ptr == 0x3)
+    {
+        ptr=Tempstr+8;
+        out_len=*ptr & 0xFF;
 //   printf("DataLength: %d\n", out_len);
 
-    ptr++;
-    memcpy(Bytes, ptr, out_len);
+        ptr++;
+        memcpy(Bytes, ptr, out_len);
+    }
+    else
+    {
+        ptr++;
+        fprintf(stderr, "MODBUS EXCEPTION: %x\n", *ptr & 0xFF);
+				out_len=-1;
+    }
+
 
     Destroy(Tempstr);
 
@@ -90,7 +113,7 @@ uint16_t ModBusReadUint16(const char **Input)
     uint16_t word;
 
     iptr=*Input;
-    word=htons(* (uint16_t *) iptr);
+    word=ntohs(* (uint16_t *) iptr);
     iptr+=2;
     *Input=iptr;
 
@@ -106,14 +129,14 @@ uint32_t ModBusReadUint32(const char **Input)
     char *optr;
 
     iptr=*Input;
-    word=htons(* (uint16_t *) iptr);
+    word=ntohs(* (uint16_t *) iptr);
     optr=(char *) &quad;
     memcpy(optr, &word, 2);
 
     iptr+=2;
     optr+=2;
 
-    word=htons(* (uint16_t *) iptr);
+    word=ntohs(* (uint16_t *) iptr);
     memcpy(optr, &word, 2);
     iptr+=2;
 
@@ -130,7 +153,7 @@ int ModbusReadDataBlock(const char *Host, int BaseAddr, char *Data, int Len)
     int len=-1;
 
     Tempstr=FormatStr(Tempstr, "tcp:%s:502", Host);
-    S=STREAMOpen(Tempstr, "");
+    S=STREAMOpen(Tempstr, "r timeout=30");
 
     if (S)
     {

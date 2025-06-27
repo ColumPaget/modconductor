@@ -103,7 +103,7 @@ void ReadBlock(char *Host, int BaseAddr, ListNode *Values)
     int len;
 
     Data=SetStrLen(Data, 4096);
-    len=ModbusReadDataBlock(Host, BaseAddr, Data, 4096);
+    len=ModbusReadDataBlock(Host, BaseAddr, Data, 40);
     if (len > 0)
     {
         dptr=Data;
@@ -202,8 +202,12 @@ int main(int argc, const char *argv[])
     switch (Settings->Action)
     {
     case ACT_INTEROGATE:
-        InterogateDevice(Settings->Host);
+        InterogateDevice(Settings->Host, Settings->BaseAddr);
         break;
+
+		case ACT_HELP:
+			PrintHelp();
+			break;
 
     default:
         DeviceDisplayFromIni(Settings->IniFile);
