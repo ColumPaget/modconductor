@@ -365,7 +365,13 @@ int ProcessNoWriteExec(int Inherit)
 #ifdef PR_SET_MDWE
 
     Flags |= PR_MDWE_REFUSE_EXEC_GAIN;
+
+
+//beware! Older linux kernels might not have the 'no inherit' feature!
+#ifdef PR_MDWE_NO_INHERIT;
     if (! Inherit) Flags |= PR_MDWE_NO_INHERIT;
+#endif
+
 //set, then check that the set worked. This correctly handles situations where we ask to set more than once
 //as the second attempt may 'fail', but we already have the desired result
     prctl(PR_SET_MDWE, Flags, 0, 0, 0);
