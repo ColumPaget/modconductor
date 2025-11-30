@@ -96,7 +96,7 @@ int ModbusReadAddress(STREAM *S, int Address, int Len, char *Bytes)
     else
     {
         ptr++;
-        fprintf(stderr, "MODBUS EXCEPTION: %x\n", *ptr & 0xFF);
+        fprintf(stderr, "MODBUS EXCEPTION: %x when reading %d bytes from %d\n", *ptr & 0xFF, Len, Address);
 				out_len=-1;
     }
 
