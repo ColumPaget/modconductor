@@ -4,6 +4,27 @@
 #include "interogate_device.h"
 
 
+int GetDataItemSize(const char *Data)
+{
+char *Type=NULL;
+int size=0;
+
+		GetToken(Data, ",", &Type, 0);
+
+    if (strcasecmp(Type, "ip")==0) size=4;
+    else if (strcmp(Type, "32")==0) size=4;
+    else if (strcmp(Type, "16")==0) size=2;
+    else if (strcmp(Type, "8")==0) size=1;
+
+fprintf(stderr, "SIZE: %d %s\n", size, Type); 
+
+    Destroy(Data);
+
+    return(size);
+}
+
+
+
 
 const char *ProcessOp(const char *ptr, double *value)
 {
@@ -95,7 +116,7 @@ const char *OutputItem(const char *DataPtr, const char *Name, const char *Type, 
 }
 
 
-void ReadBlock(char *Host, int BaseAddr, ListNode *Values)
+void ReadBlock(char *Host, int BaseAddr, int BlockLen, ListNode *Values)
 {
     char *Data=NULL, *Type=NULL, *Convert=NULL;
     const char *ptr, *dptr;
@@ -103,7 +124,7 @@ void ReadBlock(char *Host, int BaseAddr, ListNode *Values)
     int len;
 
     Data=SetStrLen(Data, 4096);
-    len=ModbusReadDataBlock(Host, BaseAddr, Data, 40);
+    len=ModbusReadDataBlock(Host, BaseAddr, Data, BlockLen);
     if (len > 0)
     {
         dptr=Data;
@@ -149,7 +170,7 @@ void ProcessDataBlock(ListNode *Block)
 {
     ListNode *BlockItems, *Curr;
     char *IP=NULL, *Config=NULL;
-    long BaseAddr=0;
+    long BaseAddr=0, BlockLen=0;
 
     printf("%s\n", Block->Tag);
     BlockItems=(ListNode *) Block->Item;
@@ -158,10 +179,16 @@ void ProcessDataBlock(ListNode *Block)
     {
         if (CompareStr(Curr->Tag, "IP")==0) IP=CopyStr(IP, (const char *) Curr->Item);
         else if (CompareStr(Curr->Tag, "BaseAddr")==0) BaseAddr=strtol((const char *) Curr->Item, NULL, 16);
+				
+				BlockLen += GetDataItemSize((const char *) Curr->Item);
         Curr=ListGetNext(Curr);
     }
 
-    ReadBlock(IP, BaseAddr, BlockItems);
+fprintf(stderr, "RB: %d\n", BlockLen);
+
+    ReadBlock(IP, BaseAddr, BlockLen, BlockItems);
+
+
     printf("\n");
 
     Destroy(Config);
