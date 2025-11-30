@@ -23,5 +23,7 @@ extern TSettings *Settings;
 void PrintHelp();
 TSettings *ParseCommandLine(int argc, const char *argv[]);
 
+PARSER *ConfigFileRead(const char *Path);
+
 
 #endif

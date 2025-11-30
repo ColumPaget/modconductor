@@ -84,6 +84,8 @@ const char *OutputItem(const char *DataPtr, const char *Name, const char *Type, 
     uint16_t word;
     double value;
 
+    if (CompareStr(Name, "IP")==0) return(DataPtr);
+    if (CompareStr(Name, "BaseAddr")==0) return(DataPtr);
 
     dptr=DataPtr;
 
@@ -147,24 +149,6 @@ void ReadBlock(char *Host, int BaseAddr, int BlockLen, ListNode *Values)
 
 
 
-PARSER *ConfigRead(const char *Path)
-{
-    PARSER *P=NULL;
-    STREAM *S=NULL;
-    char *Tempstr=NULL;
-
-    S=STREAMOpen(Path, "r");
-    if (S)
-    {
-        Tempstr=STREAMReadDocument(Tempstr, S);
-        STREAMClose(S);
-        P=ParserParseDocument("ini", Tempstr);
-    }
-
-    Destroy(Tempstr);
-    return(P);
-}
-
 
 void ProcessDataBlock(ListNode *Block)
 {
@@ -179,8 +163,7 @@ void ProcessDataBlock(ListNode *Block)
     {
         if (CompareStr(Curr->Tag, "IP")==0) IP=CopyStr(IP, (const char *) Curr->Item);
         else if (CompareStr(Curr->Tag, "BaseAddr")==0) BaseAddr=strtol((const char *) Curr->Item, NULL, 16);
-				
-				BlockLen += GetDataItemSize((const char *) Curr->Item);
+				else BlockLen += GetDataItemSize((const char *) Curr->Item);
         Curr=ListGetNext(Curr);
     }
 
@@ -200,7 +183,7 @@ void DeviceDisplayFromIni(const char *IniPath)
 {
     PARSER *P=NULL, *Curr;
 
-    P=ConfigRead(IniPath);
+    P=ConfigFileRead(IniPath);
     Curr=ListGetNext(P);
     while (Curr)
     {

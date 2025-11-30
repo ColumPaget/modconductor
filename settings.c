@@ -49,3 +49,23 @@ TSettings *ParseCommandLine(int argc, const char *argv[])
     return(Settings);
 }
 
+
+
+PARSER *ConfigFileRead(const char *Path)
+{
+    PARSER *P=NULL;
+    STREAM *S=NULL;
+    char *Tempstr=NULL;
+
+    S=STREAMOpen(Path, "r");
+    if (S)
+    {
+        Tempstr=STREAMReadDocument(Tempstr, S);
+        STREAMClose(S);
+        P=ParserParseDocument("ini", Tempstr);
+    }
+
+    Destroy(Tempstr);
+    return(P);
+}
+
