@@ -1,14 +1,45 @@
 #include "modbus.h"
 
-int ModbusReadAddress(STREAM *S, int Address, int Len, char *Bytes)
+
+const char *ModbusExceptionString(int Code)
 {
-    char *Tempstr=NULL, *ptr;
-    uint16_t word, TransactionID, *sptr;
-    int i, result, out_len;
+
+switch (Code)
+{
+case 1: return("Illegal function - function not supported by server"); break;
+case 2: return("Illegal data address - address out of range"); break;
+case 3: return("Illegal data value - value out of range for datatype"); break;
+case 4: return("Server failure"); break;
+case 5: return("Acknowledge - request is being processed, may take some time"); break;
+case 6: return("Server busy - server is busy with another request, try later"); break;
+case 7: return("Refused - server cannot perform action, consult diagnostics"); break;
+case 8: return("Memory parity error - memory corruption, retry request"); break;
+case 10: return("Gateway path unavailable - modbus gateway misconfigured"); break;
+case 11: return("Gateway target no response - target device off network or failed to respond"); break;
 
 
-    TransactionID=0x1234;
+}
 
+return("unknown exception");
+}
+
+
+
+void ModbusException(int Code, int Address, int Len)
+{
+        fprintf(stderr, "MODBUS EXCEPTION: %d (%x) \"%s\" when reading %d bytes from %d\n", Code, Code, ModbusExceptionString(Code), Len, Address);
+}
+
+
+
+int ModbusSendReadRequest(STREAM *S, int Address, int Len)
+{
+static uint16_t TransactionID=0;
+uint16_t word;
+char *Tempstr=NULL, *ptr;
+
+//    TransactionID=0x1234;
+TransactionID++;
 
     Tempstr=SetStrLen(Tempstr, 1024);
     ptr=Tempstr;
@@ -49,6 +80,23 @@ int ModbusReadAddress(STREAM *S, int Address, int Len, char *Bytes)
 
     STREAMWriteBytes(S, Tempstr, ptr-Tempstr);
     STREAMFlush(S);
+
+Destroy(Tempstr);
+
+return((int) TransactionID);
+}
+
+
+
+
+int ModbusReadAddress(STREAM *S, int Address, int Len, char *Bytes)
+{
+    char *Tempstr=NULL, *ptr;
+    uint16_t word, TransactionID, *sptr;
+    int i, result, out_len;
+
+
+    TransactionID=ModbusSendReadRequest(S, Address, Len);
 
     Tempstr=SetStrLen(Tempstr, 1024);
     result=STREAMReadBytes(S, Tempstr, 1024);
@@ -93,11 +141,11 @@ int ModbusReadAddress(STREAM *S, int Address, int Len, char *Bytes)
         ptr++;
         memcpy(Bytes, ptr, out_len);
     }
-    else
+    else 
     {
         ptr++;
-        fprintf(stderr, "MODBUS EXCEPTION: %x when reading %d bytes from %d\n", *ptr & 0xFF, Len, Address);
-				out_len=-1;
+        ModbusException(*ptr & 0xFF, Address, Len);
+	out_len=-1;
     }
 
 

@@ -18,7 +18,7 @@ int size=0;
 
 fprintf(stderr, "SIZE: %d %s\n", size, Type); 
 
-    Destroy(Data);
+    Destroy(Type);
 
     return(size);
 }
@@ -167,7 +167,7 @@ void ProcessDataBlock(ListNode *Block)
         Curr=ListGetNext(Curr);
     }
 
-fprintf(stderr, "RB: %d\n", BlockLen);
+fprintf(stderr, "RB: %ld\n", BlockLen);
 
     ReadBlock(IP, BaseAddr, BlockLen, BlockItems);
 
